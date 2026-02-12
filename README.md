@@ -1,2 +1,2 @@
 # Dactilolab.Forense
-Sistema Dactiloscópico Argentino: Confronte y cotejo dactilar.
+Sistema DactiloscOpico Argentino: Confronte y cotejo dactilar.
