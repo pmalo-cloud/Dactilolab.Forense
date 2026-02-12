@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GameState, Question } from './types';
-import { generateQuiz } from './services/geminiService';
-import { Button } from './components/Button';
+import { generateQuiz } from './geminiService';
+import { Button } from './Button';
 import { Fingerprint, ChevronRight, RotateCcw, Zap, Activity, Award } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -60,13 +60,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#020617] text-slate-200">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#020617] text-slate-200 font-sans">
       <div className="scanline"></div>
       <div className="max-w-2xl w-full bg-slate-900/90 border border-cyan-500/20 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
         {gameState === GameState.SETUP && (
           <div className="text-center space-y-8">
             <Fingerprint className="w-20 h-20 text-cyan-400 mx-auto animate-pulse" />
             <h1 className="text-4xl font-black text-white italic tracking-tighter">DACTILOLAB</h1>
+            <p className="text-slate-400 text-sm uppercase tracking-widest font-mono">Simulador Forense V1.0</p>
+            
             <div className="space-y-4 text-left">
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
                 <label className="text-[10px] text-cyan-500 font-bold block mb-2 uppercase tracking-widest">Módulo de Estudio</label>
@@ -77,12 +79,14 @@ const App: React.FC = () => {
                 </select>
               </div>
             </div>
+
             <Button onClick={startQuiz} fullWidth className="h-16 text-lg shadow-[0_0_20px_rgba(8,145,178,0.3)]">
               INICIAR PERITAJE <Zap className="w-5 h-5 fill-current" />
             </Button>
+            
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 text-sm">
-                <p className="font-bold mb-1">ERROR DE SISTEMA:</p>
+              <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 text-sm font-mono">
+                <p className="font-bold mb-1">ALERTA DE SISTEMA:</p>
                 {error}
               </div>
             )}
@@ -92,9 +96,9 @@ const App: React.FC = () => {
         {gameState === GameState.LOADING && (
           <div className="py-20 text-center space-y-6">
             <Activity className="w-16 h-16 text-cyan-500 mx-auto animate-spin" />
-            <p className="text-cyan-400 font-mono text-sm tracking-widest animate-pulse">EXTRAYENDO ARCHIVOS DE CRISTAL... {scanProgress}%</p>
+            <p className="text-cyan-400 font-mono text-sm tracking-widest animate-pulse">CARGANDO ARCHIVOS FORENSES... {scanProgress}%</p>
             <div className="w-full bg-slate-950 h-1 rounded-full overflow-hidden border border-slate-800">
-              <div className="bg-cyan-500 h-full transition-all duration-300 shadow-[0_0_10px_#22d3ee]" style={{width: `${scanProgress}%`}}></div>
+              <div className="bg-cyan-500 h-full transition-all duration-300" style={{width: `${scanProgress}%`}}></div>
             </div>
           </div>
         )}
@@ -102,10 +106,10 @@ const App: React.FC = () => {
         {gameState === GameState.PLAYING && quizData.length > 0 && (
           <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center text-[10px] text-cyan-500 font-bold uppercase tracking-tighter">
-              <span className="bg-cyan-500/10 px-2 py-1 rounded">CASO #{currentQuestionIndex + 1}</span>
-              <span className="text-slate-500">ACIERTOS: {score}</span>
+              <span className="bg-cyan-500/10 px-2 py-1 rounded">EVIDENCIA #{currentQuestionIndex + 1}</span>
+              <span className="text-slate-500">PUNTUACIÓN: {score}</span>
             </div>
-            <h2 className="text-xl font-bold text-white bg-slate-950/50 p-6 rounded-2xl border-l-4 border-cyan-500 leading-relaxed">
+            <h2 className="text-xl font-bold text-white bg-slate-950/50 p-6 rounded-2xl border-l-4 border-cyan-500 leading-relaxed font-mono">
               {quizData[currentQuestionIndex].question}
             </h2>
             <div className="grid gap-3">
@@ -131,8 +135,8 @@ const App: React.FC = () => {
             </div>
             {showExplanation && (
               <div className="bg-cyan-500/5 p-5 rounded-xl border border-cyan-500/20 animate-in slide-in-from-bottom-2">
-                <p className="text-slate-300 text-sm leading-relaxed"><span className="text-cyan-400 font-bold underline">ANÁLISIS:</span> {quizData[currentQuestionIndex].explanation}</p>
-                <Button onClick={nextQuestion} className="mt-4 ml-auto">Continuar <ChevronRight className="w-4 h-4" /></Button>
+                <p className="text-slate-300 text-sm leading-relaxed"><span className="text-cyan-400 font-bold underline font-mono">DICTAMEN:</span> {quizData[currentQuestionIndex].explanation}</p>
+                <Button onClick={nextQuestion} className="mt-4 ml-auto">SIGUIENTE CASO <ChevronRight className="w-4 h-4" /></Button>
               </div>
             )}
           </div>
@@ -140,22 +144,16 @@ const App: React.FC = () => {
 
         {gameState === GameState.RESULTS && (
           <div className="text-center space-y-8 py-10 animate-in zoom-in duration-300">
-            <div className="relative inline-block">
-              <Award className="w-24 h-24 text-cyan-400 mx-auto drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
-              <div className="absolute inset-0 animate-ping rounded-full bg-cyan-500/20"></div>
-            </div>
-            <div>
-              <h2 className="text-3xl font-black text-white tracking-tight">RESULTADO DEL PERITAJE</h2>
-              <p className="text-slate-400 text-sm mt-2 font-mono uppercase">ID DE EXAMEN: {Math.random().toString(36).substr(2, 9)}</p>
-            </div>
-            <div className="text-6xl font-black text-cyan-500 font-mono tracking-tighter">
+            <Award className="w-24 h-24 text-cyan-400 mx-auto drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+            <h2 className="text-3xl font-black text-white tracking-tight">PERITAJE FINALIZADO</h2>
+            <div className="text-6xl font-black text-cyan-500 font-mono">
               {score}<span className="text-slate-700 text-3xl">/</span>{quizData.length}
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl text-xs text-slate-500 italic">
-              {score === quizData.length ? "Pericia perfecta. Grado de experto alcanzado." : "Se recomienda revisar el Sistema Argentino y volver a intentar."}
-            </div>
+            <p className="text-slate-400 italic text-sm">
+              {score === quizData.length ? "Excelente. Aptitud profesional demostrada." : "Nivel insuficiente. Se requiere mayor estudio del Sistema Vucetich."}
+            </p>
             <Button onClick={() => setGameState(GameState.SETUP)} variant="secondary" fullWidth className="h-14">
-              NUEVO EXAMEN <RotateCcw className="w-4 h-4" />
+              REINICIAR SIMULACIÓN <RotateCcw className="w-4 h-4" />
             </Button>
           </div>
         )}
